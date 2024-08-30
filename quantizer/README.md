@@ -1,6 +1,8 @@
-A Simple Quantizer for GNURadio implemented as an Embedded Python Block.  
-The documentation is in the *quantizer.pdf* file  
+A simple "Quantizer" for GNURadio implemented as an Embedded Python Block.  
+  
+The documentation is in the "quantizer.pdf" file  
 and at,  
+&emsp;https://gnuradio-cookbook.blogspot.com/  
   
 Files,  
 &emsp;quantizer_embedded_python_bloc.grc -> GRC Test file that conains the quantizer  
