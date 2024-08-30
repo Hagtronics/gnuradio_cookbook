@@ -38,7 +38,7 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
 
     def work(self, input_items, output_items):
 
-        # The np.floor() function quantized the signal, the np.clip function clips the signal to the range specified.
+        # The np.floor() function quantizes the signal, the np.clip() function clips the signal to the range specified.
         output_items[0][:] = np.clip((np.floor(input_items[0]/self.vref*self.levels) / self.levels) * self.vref, a_max=self.vmax, a_min=self.vmin)
 
         return len(output_items[0])
