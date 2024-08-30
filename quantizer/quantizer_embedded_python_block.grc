@@ -33,11 +33,70 @@ options:
     state: enabled
 
 blocks:
+- name: ampl
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 1,0
+    label: Signal Amplitude
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0.1'
+    step: '0.1'
+    stop: '10'
+    value: '1'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [200, 380.0]
+    rotation: 0
+    state: enabled
+- name: bits
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 3,0
+    label: Quantizer Bits
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '2'
+    step: '1'
+    stop: '16'
+    value: '2'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 564.0]
+    rotation: 0
+    state: enabled
+- name: clipping
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    'false': 'False'
+    gui_hint: 5,0
+    label: Quantizer Clipping
+    'true': 'True'
+    type: int
+    value: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 564.0]
+    rotation: 0
+    state: enabled
 - name: freq
   id: variable_qtgui_range
   parameters:
     comment: ''
-    gui_hint: ''
+    gui_hint: 0,0
     label: Signal Frequency
     min_len: '200'
     orient: QtCore.Qt.Horizontal
@@ -66,6 +125,43 @@ blocks:
     coordinate: [232, 8.0]
     rotation: 0
     state: enabled
+- name: seperator
+  id: variable_qtgui_label
+  parameters:
+    comment: Just a GUI space
+    formatter: None
+    gui_hint: 2,0
+    label: ' '
+    type: string
+    value: ' '
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [552, 564.0]
+    rotation: 0
+    state: enabled
+- name: vref
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 4,0
+    label: Quantizer Vref
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '1'
+    stop: '2'
+    value: '1.0'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [184, 564.0]
+    rotation: 0
+    state: enabled
 - name: Quantizer
   id: epy_block
   parameters:
@@ -75,39 +171,40 @@ blocks:
       \ are basic_block, decim_block, interp_block\n    \"\"\"Embedded Python Block\
       \ - Quantizer\"\"\"\n\n    def __init__(self, bits=255, vref=1.0, clipping=False):\
       \  # only default arguments here\n        \"\"\" bits (int)      = The number\
-      \ of bits to quantize to\n            vref (float)    = The reference voltage,\
-      \ the range is from: (-vref) to (+vref - 1 LSB)\n            clipping (bool)\
-      \ = Flag to specify if the output signal is to be clipped to the\n         \
-      \                     range: (-vref) to (+vref - 1 LSB) as would be in a real\
-      \ ADC or DAC.\n                              Default is no clipping.\n     \
-      \   \"\"\"\n        gr.sync_block.__init__(\n            self,\n           \
-      \ name='Quantizer',   # will show up in GRC\n            in_sig=[np.float32],\n\
-      \            out_sig=[np.float32]\n        )\n\n        # Calculate variables\
-      \ needed\n        self.vref = vref\n        self.levels = (2**bits)/2\n    \
-      \    self.vmax = vref - (vref / self.levels)\n        self.vmin = -vref\n\n\
-      \        if not clipping:\n            # If not clipping, then the clip range\
-      \ is +/- Infinity\n            self.vmax = np.finfo(np.float32).max\n      \
-      \      self.vmin = np.finfo(np.float32).min\n\n    def work(self, input_items,\
-      \ output_items):\n\n        # The np.floor() function quantized the signal,\
-      \ the np.clip function clips the signal to the range specified.\n        output_items[0][:]\
-      \ = np.clip((np.floor(input_items[0]/self.vref*self.levels) / self.levels) *\
-      \ self.vref, a_max=self.vmax, a_min=self.vmin)\n\n        return len(output_items[0])\n"
+      \ of bits to quantize input signal to\n            vref (float)    = The reference\
+      \ voltage, the range is from: (-vref) to (+vref - 1 LSB)\n            clipping\
+      \ (bool) = Flag to specify if the output signal is to be clipped to the\n  \
+      \                            range: (-vref) to (+vref - 1 LSB) as would be in\
+      \ a real ADC or DAC.\n                              Default is no clipping.\n\
+      \        \"\"\"\n        gr.sync_block.__init__(\n            self,\n      \
+      \      name='Quantizer',   # will show up in GRC\n            in_sig=[np.float32],\n\
+      \            out_sig=[np.float32]\n        )\n\n        # Save class variables\n\
+      \        self.bits = bits\n        self.vref = vref\n        self.clipping =\
+      \ clipping\n\n    def work(self, input_items, output_items):\n\n        # These\
+      \ assignments could be out in the __init__(), but then they would not be runtime\
+      \ adjustable.\n        levels = (2**self.bits)/2\n        vmax = self.vref -\
+      \ (self.vref / levels)\n        vmin = -self.vref\n\n        if not self.clipping:\n\
+      \            # If not clipping, then the clip range is +/- Infinity\n      \
+      \      vmax = np.finfo(np.float32).max\n            vmin = np.finfo(np.float32).min\n\
+      \n        # The np.floor() function quantized the signal, the np.clip function\
+      \ clips the signal to the range specified.\n        output_items[0][:] = np.clip((np.floor(input_items[0]/self.vref*levels)\
+      \ / levels) * self.vref, a_max=vmax, a_min=vmin)\n\n        return len(output_items[0])\n"
     affinity: ''
     alias: ''
-    bits: '2'
-    clipping: 'False'
+    bits: bits
+    clipping: clipping
     comment: 'Embedded Python Block: Quantizer'
     maxoutbuf: '0'
     minoutbuf: '0'
-    vref: '1.0'
+    vref: vref
   states:
     _io_cache: ('Quantizer', 'blk', [('bits', '255'), ('vref', '1.0'), ('clipping',
       'False')], [('0', 'float', 1)], [('0', 'float', 1)], 'Embedded Python Block
-      - Quantizer', ['vref'])
+      - Quantizer', ['bits', 'clipping', 'vref'])
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [336, 260.0]
+    coordinate: [336, 244.0]
     rotation: 0
     state: enabled
 - name: analog_sig_source_x_0
@@ -115,7 +212,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    amp: '1'
+    amp: ampl
     comment: Simple Sine Wave Input
     freq: freq
     maxoutbuf: '0'
@@ -139,7 +236,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: Scale factor for FFT Plot
-    const: 10**(15/20)
+    const: 10**(15.75/20.0)
     maxoutbuf: '0'
     minoutbuf: '0'
     type: float
