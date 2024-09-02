@@ -2,7 +2,7 @@ A simple "Quantizer" for GNURadio implemented as an Embedded Python Block.
   
 The documentation is in the "quantizer.pdf" file  
 and at,  
-&emsp;[https://gnuradio-cookbook.blogspot.com/](https://gnuradio-cookbook.blogspot.com/2024/09/gnuradio-quantizer-implementation.html)  
+&emsp;https://gnuradio-cookbook.blogspot.com/2024/09/gnuradio-quantizer-implementation.html  
   
 Files,  
 &emsp;quantizer_embedded_python_bloc.grc -> GRC Test file that conains the quantizer  
