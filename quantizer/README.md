@@ -1,6 +1,6 @@
 A simple "Quantizer" for GNURadio implemented as an Embedded Python Block.  
   
-The documentation is in the "quantizer.pdf" file  
+The documentation is in the "Quantizer_documentation.pdf" file  
 and at,  
 &emsp;https://gnuradio-cookbook.blogspot.com/2024/09/gnuradio-quantizer-implementation.html  
   
